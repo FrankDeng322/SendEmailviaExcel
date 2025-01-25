@@ -1,1 +1,54 @@
- 
+Sub SendEmailWithExcelContent()
+    ' 声明变量
+    Dim OutApp As Object
+    Dim OutMail As Object
+    Dim rng As Range
+    
+    ' 刷新所有数据
+    ActiveWorkbook.RefreshAll
+    
+    ' 等待刷新完成
+    Application.CalculateUntilAsyncQueriesComplete
+    
+    ' 设置要复制的范围（这里以A1:D10为例，您可以根据需要修改）
+    Set rng = Sheet1.Range("A1:D10")
+    
+    ' 创建Outlook应用程序对象
+    Set OutApp = CreateObject("Outlook.Application")
+    
+    ' 创建新邮件
+    Set OutMail = OutApp.CreateItem(0)
+    
+    ' 复制选定范围
+    rng.Copy
+    
+    With OutMail
+        ' 设置邮件属性
+        .Subject = "Excel数据更新" ' 您可以修改邮件主题
+        
+        ' 切换到邮件编辑器
+        .Display
+        
+        ' 将Excel内容粘贴到邮件正文
+        .HTMLBody = "<html><body>" & _
+                   "您好，<br><br>" & _
+                   "以下是最新的Excel数据：<br><br>" & _
+                   "</body></html>"
+                   
+        ' 将光标移到正文末尾
+        Dim Inspector As Object
+        Set Inspector = .GetInspector
+        Dim WordDoc As Object
+        Set WordDoc = Inspector.WordEditor
+        
+        ' 粘贴Excel内容
+        WordDoc.Windows(1).Selection.Paste
+    End With
+    
+    ' 清理剪贴板
+    Application.CutCopyMode = False
+    
+    ' 清理对象
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+End Sub 
